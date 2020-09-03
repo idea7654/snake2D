@@ -20,7 +20,6 @@ var food = {
     y: 500,
     scl: 10
 };
-var rspeed = 10;
 
 function pickLocation() {
     var cols, rows;
@@ -42,46 +41,8 @@ function drawFood() {
 
 function update() {
     var radian = trigo(client.x - snake.x, client.y - snake.y); //역탄젠트 값
-    var degree = radian * 180 / Math.PI;
 
-    //snake.d = radian;
-    
-    if(degree - snake.d * 180 / Math.PI < 0){
-      degree = degree + 360;
-    }
-    console.log(degree);
-    /*
-    if(degree - snake.d * 180 / Math.PI < 180){
-      snake.d += rspeed * Math.PI / 180;
-      if(snake.d > (degree + rspeed)* Math.PI / 180){
-        //rspeed = 0;
-        snake.d = radian;
-      }
-    }if(degree > 180){
-      snake.d -= rspeed * Math.PI / 180;
-      if(snake.d < (degree - rspeed) * Math.PI / 180){
-        //rspeed = 0;
-        snake.d = radian;
-      }
-    }*/
-    
-    if(snake.d < 180) {
-        if(degree - (snake.d * 180 / Math.PI) < 180){
-            snake.d += rspeed * Math.PI / 180;
-            if(snake.d > (degree + rspeed)* Math.PI / 180){
-            //rspeed = 0;
-            snake.d = radian;
-            }
-        }else{
-            snake.d -= rspeed * Math.PI / 180;
-            if(snake.d < (degree - rspeed)* Math.PI / 180){
-            //rspeed = 0;
-            snake.d = radian;
-            }
-        }
-    }//else{
-       // if()
-    //}
+    snake.d = radian;
 
     snake.x += snake.xspeed * Math.cos(radian) * snake.dspeed;
     snake.y += snake.yspeed * Math.sin(radian) * snake.dspeed;
@@ -193,7 +154,7 @@ function gameLoop() {
 
 function init() {
     vcanvas = document.getElementById("myCanvas");
-    vcanvas.ontouchstart = set_touch;
+    vcanvas.ontouchmove = set_touch;
     ctx = vcanvas.getContext("2d");
     snake.x = vcanvas.width / 2;
     snake.y = vcanvas.height / 2;
@@ -212,11 +173,11 @@ function set_touch(evt) {
 }
 
 function set_key() {
-    if(event.keyCode === 37) {
+    if(event.keyCode === 38) {
         snake.xspeed += 0.2;
         snake.yspeed += 0.2;
     }
-    if(event.keyCode === 39) {
+    if(event.keyCode === 40) {
         if(snake.xspeed > 0.5){
             snake.xspeed -= 0.2;
             snake.yspeed -= 0.2;
