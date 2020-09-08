@@ -6,26 +6,21 @@ var snake = {
     d: 0,
     scl: 30,
     dspeed: 0,
-    speed: 5
+    speed: 10
 };
 var tail = [];
-var client = {
-    x: null,
-    y: null
-};
 var food = {
     x: 500,
     y: 500,
     scl: 10
 };
 var flag = 0;
-var circle = {
+var degree = 0;
+var mouse = {
     x: null,
     y: null,
-    radius: 100,
-    angle: 0
+    scl: 3
 };
-var xLocation = snake.x;
 
 function pickLocation() {
     var cols, rows;
@@ -46,32 +41,30 @@ function drawFood() {
 }
 
 function update() {
-    //var radian = trigo(client.x - snake.x, client.y - snake.y); //역탄젠트 값
-
-
     if (flag === 0) {
-        snake.dspeed = 0;
-    }
-
-    if (flag === 1) {
-        snake.dspeed = -0.01;
-    }
-
-    if (flag === 2) {
-        snake.dspeed = 0.01;
+        snake.d = degree / 180 * Math.PI;
+        snake.x += snake.speed * Math.cos(snake.d);
+        snake.y += snake.speed * Math.sin(snake.d);
     }
     
-    snake.x = xLocation + Math.cos(circle.angle) * circle.radius;
-    snake.y = xLocation + Math.sin(circle.angle) * circle.radius;
-
-    circle.angle += snake.dspeed;
-
-    snake.d = circle.angle;
-}
-
-function updateSt() {
-    snake.x += snake.speed * Math.cos(snake.d);
-    snake.y += snake.speed * Math.sin(snake.d);
+    if (flag === 1) {
+        degree -= 10;
+        snake.d = degree / 180 * Math.PI;
+        snake.x += snake.speed * Math.cos(snake.d);
+        snake.y += snake.speed * Math.sin(snake.d);
+    }
+    
+    if (flag === 2) { //right
+        degree += 10;
+        snake.d = degree / 180 * Math.PI;
+        snake.x += snake.speed * Math.cos(snake.d);
+        snake.y += snake.speed * Math.sin(snake.d);
+    }
+    
+    mouse.x = Math.cos(degree) * (snake.scl + mouse.scl/2);
+    mouse.y = Math.sin(degree) * (snake.scl + mouse.scl/2);
+    
+    console.log(mouse.x, snake.x);
 }
 
 function updateTail() {
@@ -89,9 +82,9 @@ function updateTail() {
 function eat(pos) {
     var a, x, y;
 
-    a = snake.scl + food.scl;
-    x = snake.x - food.x;
-    y = snake.y - food.y;
+    a = mouse.scl + food.scl;
+    x = mouse.x - food.x;
+    y = mouse.y - food.y;
 
     if (a > Math.sqrt((x * x) + (y * y))) {
         tail.push({
@@ -105,11 +98,27 @@ function eat(pos) {
 }
 
 function drawSnake() {
+    /*
+    ctx.fillStyle = "blue";
+    ctx.beginPath();
+    ctx.arc(31, 7, 3, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(33, 0, 3, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(31, -7, 3, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.fill();*/
+    //mouse
     ctx.fillStyle = "orange";
     ctx.beginPath();
     ctx.arc(0, 0, snake.scl, 0, Math.PI * 2);
     ctx.stroke();
     ctx.fill();
+    //head
     ctx.fillStyle = "black";
     ctx.beginPath();
     ctx.arc(15, -15, 5, 0, Math.PI * 2);
@@ -118,6 +127,23 @@ function drawSnake() {
     ctx.fillStyle = "black";
     ctx.beginPath();
     ctx.arc(15, 15, 5, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.fill();
+    //eyes
+}
+
+function drawMouse(){
+    ctx.fillStyle = "blue";
+    ctx.beginPath();
+    ctx.arc(31, 7, 3, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(33, 0, 3, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(31, -7, 3, 0, Math.PI * 2);
     ctx.stroke();
     ctx.fill();
 }
@@ -138,17 +164,14 @@ function draw() {
     ctx.save();
     ctx.translate(snake.x, snake.y);
     ctx.rotate(snake.d);
+    drawMouse();
     drawSnake();
     ctx.restore();
 }
 
 function gameLoop() {
     ctx.clearRect(0, 0, vcanvas.width, vcanvas.height);
-    if (flag === 0) {
-        updateSt();
-    } else {
-        update();
-    }
+    update();
     updateTail();
     if (eat(food)) {
         pickLocation();
@@ -160,12 +183,11 @@ function gameLoop() {
 
 function init() {
     vcanvas = document.getElementById("myCanvas");
-    //vcanvas.ontouchstart = set_touch;
     ctx = vcanvas.getContext("2d");
     snake.x = vcanvas.width / 2;
     snake.y = vcanvas.height / 2;
     pickLocation();
-    setInterval(gameLoop, 100);
+    setInterval(gameLoop, 80);
 }
 
 // key control
@@ -181,21 +203,11 @@ function set_key() {
 function set_key_up() {
     if (event.keyCode === 37) {
         flag = 0;
-        
-        xLocation = snake.x + 5;
     }
     if (event.keyCode === 39) {
         flag = 0;
-        
-        xLocation = snake.x - 5;
     }
 }
 
 document.onkeydown = set_key;
 document.onkeyup = set_key_up;
-
-function trigo(x, y) {
-    var radian = Math.atan2(y, x);
-    //var degree = radian * 180 / Math.PI;
-    return radian;
-}
