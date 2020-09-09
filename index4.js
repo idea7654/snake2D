@@ -45,25 +45,28 @@ function update() {
         snake.d = degree / 180 * Math.PI;
         snake.x += snake.speed * Math.cos(snake.d);
         snake.y += snake.speed * Math.sin(snake.d);
+        mouse.x += snake.speed * Math.cos(snake.d);
+        mouse.y += snake.speed * Math.sin(snake.d);
     }
-    
+
     if (flag === 1) {
         degree -= 10;
         snake.d = degree / 180 * Math.PI;
         snake.x += snake.speed * Math.cos(snake.d);
         snake.y += snake.speed * Math.sin(snake.d);
+        mouse.x += snake.speed * Math.cos(snake.d);
+        mouse.y += snake.speed * Math.sin(snake.d);
     }
-    
+
     if (flag === 2) { //right
         degree += 10;
         snake.d = degree / 180 * Math.PI;
         snake.x += snake.speed * Math.cos(snake.d);
         snake.y += snake.speed * Math.sin(snake.d);
+        mouse.x += snake.speed * Math.cos(snake.d);
+        mouse.y += snake.speed * Math.sin(snake.d);
     }
-    
-    mouse.x = Math.cos(degree) * (snake.scl + mouse.scl/2);
-    mouse.y = Math.sin(degree) * (snake.scl + mouse.scl/2);
-    
+
     console.log(mouse.x, snake.x);
 }
 
@@ -98,21 +101,6 @@ function eat(pos) {
 }
 
 function drawSnake() {
-    /*
-    ctx.fillStyle = "blue";
-    ctx.beginPath();
-    ctx.arc(31, 7, 3, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(33, 0, 3, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(31, -7, 3, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.fill();*/
-    //mouse
     ctx.fillStyle = "orange";
     ctx.beginPath();
     ctx.arc(0, 0, snake.scl, 0, Math.PI * 2);
@@ -132,7 +120,7 @@ function drawSnake() {
     //eyes
 }
 
-function drawMouse(){
+function drawMouse() {
     ctx.fillStyle = "blue";
     ctx.beginPath();
     ctx.arc(31, 7, 3, 0, Math.PI * 2);
@@ -162,9 +150,13 @@ function drawTail() {
 
 function draw() {
     ctx.save();
-    ctx.translate(snake.x, snake.y);
+    ctx.translate(mouse.x, mouse.y);
     ctx.rotate(snake.d);
     drawMouse();
+    ctx.restore();
+    ctx.save();
+    ctx.translate(snake.x, snake.y);
+    ctx.rotate(snake.d);
     drawSnake();
     ctx.restore();
 }
@@ -186,6 +178,8 @@ function init() {
     ctx = vcanvas.getContext("2d");
     snake.x = vcanvas.width / 2;
     snake.y = vcanvas.height / 2;
+    mouse.x = vcanvas.width / 2;
+    mouse.y = vcanvas.height / 2;
     pickLocation();
     setInterval(gameLoop, 80);
 }
