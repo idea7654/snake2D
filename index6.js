@@ -103,8 +103,10 @@ function eat(pos) {
         xx = snake.x - food.x;
         yy = snake.y - food.y;
 
-        food.x += Math.round(Math.cos(radian) * 5);
-        food.y += Math.round(Math.sin(radian) * 5);
+        //food.x += Math.round(Math.cos(radian) * 5);
+        //food.y += Math.round(Math.sin(radian) * 5);
+        food.x += Math.cos(radian);
+        food.y += Math.sin(radian);
 
         if (scl > Math.sqrt((xx * xx) + (yy * yy))) {
             tail.push({
@@ -182,7 +184,6 @@ function gameLoop() {
     drawFood();
     draw();
     drawTail();
-    
 }
 
 function init() {
