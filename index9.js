@@ -46,14 +46,12 @@ function Snake() {
                         y: null
                     });
                     food.splice(index, 1);
-                    console.log(index);
                     return true;
                 }
             } else {
                 return false;
             }
         });
-
     };
 
     this.updateTail = function () {
@@ -103,21 +101,58 @@ function Snake() {
     this.bounce = function () {
         var verAngle = (180 - degree);
         var horAngle = (360 - degree);
-
-        if (this.x + this.scl > vcanvas.width) {
-            degree = verAngle;
+        if (degree < 0) {
+            degree = degree + 360;
+        }
+        if (degree > 360) {
+            degree = degree - 360;
+        }
+        if(horAngle < 0){
+            horAngle = horAngle + 360;
         }
 
-        if (this.x - this.scl < 0) {
-            degree = verAngle;
+        if (this.x + this.scl > vcanvas.width - 10) {
+            //degree = verAngle;
+            //degree += verAngle / 10;
+            if(degree % 360 < 180 && degree % 360 > 0) {
+                degree += 10;
+            }
+            else{
+                degree -= 10;
+            }
         }
 
-        if (this.y + this.scl > vcanvas.height) {
-            degree = horAngle;
+        if (this.x - this.scl < 10) {
+            //degree = verAngle;
+            //degree -= verAngle / 10;
+            console.log(degree);
+            if(degree % 360 > 180 && degree % 360 < 360){
+                //degree += Math.abs(verAngle - degree) / (각도의 크기);
+                degree += 10;
+            }else{
+                degree -= 10;
+            }
         }
 
-        if (this.y - this.scl < 0) {
-            degree = horAngle;
+        if (this.y + this.scl > vcanvas.height - 10) {
+            //degree = horAngle;
+            console.log(degree);
+            if(degree % 360 < 270 && degree % 360 > 90) {
+                degree += 10;
+            }
+            else{
+                degree -= 10;
+            }
+        }
+
+        if (this.y - this.scl < 10) {
+            //degree = horAngle;
+            if(degree % 360 < 270 && degree % 360 > 90) {
+                degree -= 10;
+            }
+            else{
+                degree += 10;
+            }
         }
     }
 

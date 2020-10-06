@@ -4,6 +4,11 @@ var food = [];
 var flag = 0;
 var degree = 0;
 var s;
+var socket = io();
+
+function sendData() {
+    socket.emit('snakeLocation', s);
+}
 
 function Snake() {
     this.x = vcanvas.width / 2;
@@ -22,7 +27,7 @@ function Snake() {
         y: null,
         scl: 2.5
     };
-
+    
     this.eat = function (pos) {
         var a, x, y;
         food.forEach((i, index) => {
@@ -46,16 +51,14 @@ function Snake() {
                         y: null
                     });
                     food.splice(index, 1);
-                    console.log(index);
                     return true;
                 }
             } else {
                 return false;
             }
         });
-
     };
-
+    
     this.updateTail = function () {
         var i;
 
@@ -67,7 +70,7 @@ function Snake() {
             y: this.y
         };
     };
-
+    
     this.update = function () {
         if (flag === 0) {
             this.d = degree / 180 * Math.PI;
@@ -99,25 +102,59 @@ function Snake() {
         this.collider.y = this.y + this.collider.scl * (this.speed * Math.sin(this.d));
         //먹이 흡수
     };
-
+    
     this.bounce = function () {
         var verAngle = (180 - degree);
         var horAngle = (360 - degree);
-
-        if (this.x + this.scl > vcanvas.width) {
-            degree = verAngle;
+        if (degree < 0) {
+            degree = degree + 360;
+        }
+        if (degree > 360) {
+            degree = degree - 360;
+        }
+        if (horAngle < 0) {
+            horAngle = horAngle + 360;
         }
 
-        if (this.x - this.scl < 0) {
-            degree = verAngle;
+        if (this.x + this.scl > vcanvas.width - 10) {
+            //degree = verAngle;
+            //degree += verAngle / 10;
+            if (degree % 360 < 180 && degree % 360 > 0) {
+                degree += 10;
+            } else {
+                degree -= 10;
+            }
         }
 
-        if (this.y + this.scl > vcanvas.height) {
-            degree = horAngle;
+        if (this.x - this.scl < 10) {
+            //degree = verAngle;
+            //degree -= verAngle / 10;
+            console.log(degree);
+            if (degree % 360 > 180 && degree % 360 < 360) {
+                //degree += Math.abs(verAngle - degree) / (각도의 크기);
+                degree += 10;
+            } else {
+                degree -= 10;
+            }
         }
 
-        if (this.y - this.scl < 0) {
-            degree = horAngle;
+        if (this.y + this.scl > vcanvas.height - 10) {
+            //degree = horAngle;
+            console.log(degree);
+            if (degree % 360 < 270 && degree % 360 > 90) {
+                degree += 10;
+            } else {
+                degree -= 10;
+            }
+        }
+
+        if (this.y - this.scl < 10) {
+            //degree = horAngle;
+            if (degree % 360 < 270 && degree % 360 > 90) {
+                degree -= 10;
+            } else {
+                degree += 10;
+            }
         }
     }
 
@@ -175,7 +212,6 @@ function Snake() {
         ctx.restore();
     };
 }
-
 function createFood() {
     var x, y, scl;
     x = Math.floor(Math.random() * vcanvas.width);
@@ -189,6 +225,7 @@ function createFood() {
             scl: scl
         });
     }
+    socket.emit('foodLocation', food);
 }
 
 function drawFood() {
@@ -211,6 +248,7 @@ function gameLoop() {
     drawFood();
     s.draw();
     s.drawTail();
+    sendData();
 }
 
 function init() {
@@ -228,6 +266,8 @@ function set_key() {
     if (event.keyCode === 39) {
         flag = 2;
     }
+
+    socket.emit('downKeyEvent', flag);
 }
 
 function set_key_up() {
@@ -237,7 +277,34 @@ function set_key_up() {
     if (event.keyCode === 39) {
         flag = 0;
     }
+    socket.emit('upKeyEvent', flag);
 }
 
 document.onkeydown = set_key;
 document.onkeyup = set_key_up;
+
+
+//Socket
+
+socket.on('foodLocation', (foodData) => {
+    food = foodData;
+});
+
+socket.on('snakeLocation', (snakeData) => {
+    //s = snakeData;
+    s.x = snakeData.x;
+    s.y = snakeData.y;
+    s.d = snakeData.d;
+    s.tail = snakeData.tail;
+    s.mouse = snakeData.mouse;
+    s.collider = snakeData.collider;
+});
+
+socket.on('downKeyEvent', (keyData) => {
+    flag = keyData;
+    console.log(flag);
+});
+
+socket.on('upKeyEvent', (keyData) => {
+    flag = keyData;
+});
