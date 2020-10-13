@@ -426,65 +426,99 @@ ___
 
 Snake의 벽 충돌판정을 공 튀기기처럼 즉각적인 반응이 아닌, 부드럽게 회전하는 물리법칙을 사용하고자 하였다.
 
-우선, 서서히 꺾는 판정은 입사-반사각과 달리 한 면에서도 어느쪽에서 접근하는지 알아야했기에 if문으로 분기하였다.
+우선, 벽에 닿기 전에 40만큼 안쪽에 있는 가상의 벽에서 충돌판정을 하여 그때의 Snake의 각도를 받아온다.
 
-이후로 현재는 상수로 값을 지정하여 어떤 각도를 입사각으로 받아도 똑같은 속도로 움직이나,
+그 때 받아온 Snake의 각도를 바탕으로 스네이크가 회전하는 시점을 변경하여 스네이크가 벽에 부딪히지 않으면서
 
-벽에 충돌하지 않고 이를 해결하기 위해서는
+회전하는 물리법칙을 구현하였다.
 
-매 틱마다 회전하는 각도의 크기는 「각도의 크기」와 반비례하여야 한다.
+스네이크가 회전할 때 에러가 날 수 있으므로, 회전하는 동안은 keyEvent를 발생시키지 않는다면 깔끔해질 것 같다.
 
 ```javascript
 this.bounce = function () {
-        var verAngle = (180 - degree);
-        var horAngle = (360 - degree);
+        var bouncePoint = 40;
+
         if (degree < 0) {
             degree = degree + 360;
         }
         if (degree > 360) {
             degree = degree - 360;
         }
-        if(horAngle < 0){
-            horAngle = horAngle + 360;
+        
+        if (this.x + this.scl > vcanvas.width - bouncePoint) {
+            if (this.x + this.scl < vcanvas.width - bouncePoint + 10 && this.nowFlag === false) {
+                this.nowAngle = degree;
+                this.nowFlag = true;
+            } else {
+                this.nowFlag = false;
+            }
+            if (degree % 360 < 180 && degree % 360 > 0) {
+                if (this.x + this.scl > vcanvas.width - ((this.nowAngle - 90) * (this.nowAngle - 90) / 405 * 2 + 3)) {
+                    degree += 10;
+                }
+                //위에서 아래
+            } else {
+                if (this.x + this.scl > vcanvas.width - ((this.nowAngle - 270) * (this.nowAngle - 270) / 405 * 2 + 3)) {
+                    degree -= 10;
+                }
+                //아래에서 위
+            } //오른쪽벽
         }
 
-        if (this.x + this.scl > vcanvas.width - 10) {
-            if(degree % 360 < 180 && degree % 360 > 0) {
-                degree += 10;
+        if (this.x - this.scl < bouncePoint) {
+            if (this.x - this.scl > bouncePoint - 10 && this.nowFlag === false) {
+                this.nowAngle = degree;
+                this.nowFlag = true;
+            } else {
+                this.nowFlag = false;
             }
-            else{
-                degree -= 10;
-            }
+            if (degree % 360 > 180 && degree % 360 < 360) {
+                if (this.x - this.scl < (this.nowAngle - 270) * (this.nowAngle - 270) / 405 * 2 + 3) {
+                    degree += 10;
+                }
+            } else {
+                if (this.x - this.scl < (this.nowAngle - 90) * (this.nowAngle - 90) / 405 * 2 + 3) {
+                    degree -= 10;
+                }
+            } //왼쪽 벽
         }
 
-        if (this.x - this.scl < 10) {
-            console.log(degree);
-            if(degree % 360 > 180 && degree % 360 < 360){
-                //degree += Math.abs(verAngle - degree) / (각도의 크기);
-                degree += 10;
-            }else{
-                degree -= 10;
-            }
-        }
 
-        if (this.y + this.scl > vcanvas.height - 10) {
-            console.log(degree);
-            if(degree % 360 < 270 && degree % 360 > 90) {
-                degree += 10;
+        if (this.y + this.scl > vcanvas.height - bouncePoint) {
+            if (this.y + this.scl < vcanvas.height - bouncePoint + 10 && this.nowFlag === false) {
+                this.nowAngle = degree;
+                this.nowFlag = true;
+            } else {
+                this.nowFlag = false;
             }
-            else{
-                degree -= 10;
+            if (degree % 360 < 270 && degree % 360 > 90) {
+                if(this.y + this.scl > vcanvas.height - ((this.nowAngle - 180) * (this.nowAngle - 180) / 405 * 2 + 3)){
+                    degree += 10;
+                }
+            } else {
+                if(this.y + this.scl > vcanvas.height - ((this.nowAngle) * (this.nowAngle) / 405 * 2 + 3)){
+                    degree -= 10;
+                }
             }
-        }
+        } //아래쪽 벽
 
-        if (this.y - this.scl < 10) {
-            if(degree % 360 < 270 && degree % 360 > 90) {
-                degree -= 10;
+        if (this.y - this.scl < bouncePoint) {
+            if (this.y - this.scl > bouncePoint - 10 && this.nowFlag === false) {
+                this.nowAngle = degree;
+                this.nowFlag = true;
+            } else {
+                this.nowFlag = false;
             }
-            else{
-                degree += 10;
+            if (degree % 360 < 270 && degree % 360 > 90) {
+                if(this.y - this.scl < (this.nowAngle - 180) * (this.nowAngle - 180) / 405 * 2 + 3){
+                    degree -= 10;
+                }
+            } else {
+                if(this.y - this.scl < (this.nowAngle - 360) * (this.nowAngle - 360) / 405 * 2 + 3){
+                    degree += 10;
+                }
             }
-        }
+        } //위쪽 벽
     }
 ```
 
